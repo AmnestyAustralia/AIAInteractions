@@ -1,0 +1,356 @@
+﻿<GlobalChangeSpec 
+  xmlns="bb_appfx_globalchange"
+  xmlns:c="bb_appfx_commontypes"
+	ID="7937a8f3-f1c5-4031-b58c-5e7f932b9e95"
+  Name="Delete interaction attribute (AIA)"
+  Description="Deletes an attribute from an interaction record"
+  Author="Danny Smith (AIA)"
+  DisplayName="Delete interaction attribute (AIA)"
+  GlobalChangeFolder="Constituent\Interaction"
+  SPName="USR_AIA_USP_GLOBALCHANGE_DELETEINTERACTIONATTRIBUTE"
+>
+
+	<!-- describe the SP that performs the global change operation -->
+	<CreateProcedureSQL>
+		<![CDATA[
+create procedure dbo.USR_AIA_USP_GLOBALCHANGE_DELETEINTERACTIONATTRIBUTE
+(
+  @IDSETREGISTERID uniqueidentifier = null, 
+  @ATTRIBUTECATEGORYID uniqueidentifier,
+  @CHANGEAGENTID uniqueidentifier = null,
+  @ASOF as datetime = null,
+  @NUMBERADDED int = 0 output,
+  @NUMBEREDITED int = 0 output,
+  @NUMBERDELETED int = 0 output,
+  @CURRENTAPPUSERID uniqueidentifier = null,
+  @STRINGVALUE nvarchar(250) = null,
+  @NUMBERVALUE int = null,
+  @MONEYVALUE money = null,
+  @DATEVALUE datetime = null,
+  @BOOLEANVALUE bit = null,
+  @CODETABLEVALUE uniqueidentifier = null,
+  @FUZZYDATEVALUE udt_fuzzydate = null,
+  @CONSTITUENTIDVALUE uniqueidentifier = null,
+  @HOURMINUTEVALUE udt_hourminute = null,
+  @MEMOVALUE nvarchar(max) = null,
+  @CURRENCYID uniqueidentifier = null,
+  @DELETETYPE tinyint = null
+)
+as
+  set nocount off;
+  
+  declare @ATTRIBUTETABLENAME nvarchar(128)
+  declare @ONEPERRECORD bit
+  declare @DATATYPE int;
+  declare @VALUECOLUMNNAME nvarchar(128)
+  
+  set @NUMBERADDED = 0;
+  set @NUMBEREDITED = 0;
+  set @NUMBERDELETED = 0; 
+  
+  if @CHANGEAGENTID is null
+    exec dbo.USP_CHANGEAGENT_GETORCREATECHANGEAGENT @CHANGEAGENTID output;
+          
+  select 
+    @DATATYPE = ATTRIBUTECATEGORY.DATATYPECODE, 
+    @ATTRIBUTETABLENAME = TABLECATALOG.TABLENAME, 
+    @ONEPERRECORD = ATTRIBUTECATEGORY.ONLYALLOWONEPERRECORD,
+    @VALUECOLUMNNAME = ATTRIBUTECATEGORY.VALUECOLUMNNAME
+  from 
+    dbo.ATTRIBUTECATEGORY 
+    inner join dbo.TABLECATALOG on TABLECATALOG.ID = ATTRIBUTECATEGORY.TABLECATALOGID 
+  where 
+    ATTRIBUTECATEGORY.ID = @ATTRIBUTECATEGORYID;
+  
+  declare @SELECTIONTABLESQL nvarchar(100);
+  declare @SELECTION nvarchar(43);
+  set @SELECTION = '';
+  
+  begin try
+    declare @CONTEXTCACHE varbinary(128);
+    declare @DELETESQL nvarchar(max);
+  
+    if @IDSETREGISTERID is not null 
+      begin
+        /* Create temp table to hold selection ID values */
+        declare @PARAMETERDEFINITION nvarchar(500);
+        set @PARAMETERDEFINITION = '@IDSETREGISTERIDPARAMETER uniqueidentifier';
+        
+        select @SELECTION = '##SELECTION' + replace(cast(newid() as nvarchar(36)),'-','')
+        
+        set @SELECTIONTABLESQL = 'create table ' + @SELECTION + '(ID UNIQUEIDENTIFIER NOT NULL PRIMARY KEY)';
+        exec sp_executesql @SELECTIONTABLESQL;
+        
+        declare @IDSETREGISTERSQL nvarchar(max);
+        
+        begin
+          --insert all records from the selection
+          set @IDSETREGISTERSQL = 'insert into ' + @SELECTION + '(ID) select ID from dbo.UFN_IDSETREADER_GETRESULTS_GUID(@IDSETREGISTERIDPARAMETER)';
+          exec sp_executesql @IDSETREGISTERSQL, @PARAMETERDEFINITION, @IDSETREGISTERIDPARAMETER = @IDSETREGISTERID;
+        end
+        
+        if @ONEPERRECORD = 1  
+        begin
+          set @DELETESQL = 'delete from dbo.[' + @ATTRIBUTETABLENAME + '] where ID in(select ID from ' + @SELECTION + ')';
+        end
+        else
+        begin
+          set @DELETESQL = 'delete from dbo.[' + @ATTRIBUTETABLENAME + '] where INTERACTIONID in(select ID from ' + @SELECTION + ')';
+        end
+        
+        -- append where clause when only certain values are to be deleted
+        if @DELETETYPE = 1
+        begin
+          if @DATATYPE = 0 and @STRINGVALUE <> ''
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + @STRINGVALUE + ''''
+          end
+          else if @DATATYPE = 1 and @NUMBERVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ' + convert(nvarchar(max), @NUMBERVALUE)
+          end
+          else if @DATATYPE = 2 and @DATEVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @DATEVALUE) + ''''
+          end
+          else if @DATATYPE = 3 and @MONEYVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ' + convert(nvarchar(max), @MONEYVALUE)
+          end
+          else if @DATATYPE = 4 and @BOOLEANVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ' + convert(nvarchar(max), case @BOOLEANVALUE when 'TRUE' then 1 else 0 end)
+          end
+          else if @DATATYPE = 5 and @CODETABLEVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @CODETABLEVALUE) + ''''
+          end
+          else if @DATATYPE = 6 and @CONSTITUENTIDVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @CONSTITUENTIDVALUE) + ''''
+          end
+          else if @DATATYPE = 7 and @FUZZYDATEVALUE <> '00000000'
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @FUZZYDATEVALUE) + ''''
+          end
+          else if @DATATYPE = 8 and @HOURMINUTEVALUE <> ''
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @HOURMINUTEVALUE) + ''''
+          end
+          else if @DATATYPE = 9 and @MEMOVALUE <> ''
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + @MEMOVALUE + ''''
+          end
+        end
+
+        /* Cache current context information@ */
+        set @CONTEXTCACHE = CONTEXT_INFO();
+
+        /* Set CONTEXT_INFO to @CHANGEAGENTID */
+        set CONTEXT_INFO @CHANGEAGENTID;
+          
+        /* delete records */
+        exec sp_executesql @DELETESQL
+        set @NUMBERDELETED = @@ROWCOUNT;
+        
+        /* Reset CONTEXT_INFO to previous value */
+        if not @contextCache is null begin
+          set CONTEXT_INFO @CONTEXTCACHE;
+        end 
+        
+        set @SELECTIONTABLESQL = 'drop table ' + @SELECTION;
+        exec sp_executesql @SELECTIONTABLESQL;
+        set @SELECTION = '';
+      end
+    else
+      begin
+        if @ONEPERRECORD = 1
+          -- delete all attribute records
+          set @DELETESQL = 'delete from dbo.[' + @ATTRIBUTETABLENAME + '] where ID in 
+            (
+              select SELECTEDINTERACTION.ID 
+              from dbo.[' + @ATTRIBUTETABLENAME + '] SELECTEDINTERACTION ' +
+            ')';  
+        else
+          -- delete all attribute records
+          set @DELETESQL = 'delete from dbo.[' + @ATTRIBUTETABLENAME + '] where INTERACTIONID in 
+            (
+              select SELECTEDINTERACTION.INTERACTIONID
+              from dbo.[' + @ATTRIBUTETABLENAME + '] SELECTEDINTERACTION ' +
+            ')';
+
+        -- append where clause when only certain values are to be deleted
+        if @DELETETYPE = 1
+        begin
+          if @DATATYPE = 0 and @STRINGVALUE <> ''
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + @STRINGVALUE + ''''
+          end
+          else if @DATATYPE = 1 and @NUMBERVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ' + convert(nvarchar(max), @NUMBERVALUE)
+          end
+          else if @DATATYPE = 2 and @DATEVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @DATEVALUE) + ''''
+          end
+          else if @DATATYPE = 3 and @MONEYVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ' + convert(nvarchar(max), @MONEYVALUE)
+          end
+          else if @DATATYPE = 4 and @BOOLEANVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ' + convert(nvarchar(max), case @BOOLEANVALUE when 'TRUE' then 1 else 0 end)
+          end
+          else if @DATATYPE = 5 and @CODETABLEVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @CODETABLEVALUE) + ''''
+          end
+          else if @DATATYPE = 6 and @CONSTITUENTIDVALUE is not null
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @CONSTITUENTIDVALUE) + ''''
+          end
+          else if @DATATYPE = 7 and @FUZZYDATEVALUE <>  '00000000'
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @FUZZYDATEVALUE) + ''''
+          end
+          else if @DATATYPE = 8 and @HOURMINUTEVALUE <> ''
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + convert(nvarchar(max), @HOURMINUTEVALUE) + ''''
+          end
+          else if @DATATYPE = 9 and @MEMOVALUE <> ''
+          begin
+            set @DELETESQL = @DELETESQL + ' and ' + @VALUECOLUMNNAME + ' = ''' + @MEMOVALUE + ''''
+          end
+        end
+
+        /* Cache current context information@ */
+        set @CONTEXTCACHE = CONTEXT_INFO();
+
+        /* Set CONTEXT_INFO to @CHANGEAGENTID */
+        set CONTEXT_INFO @CHANGEAGENTID;
+          
+        /* delete records */
+        exec sp_executesql @DELETESQL
+        set @NUMBERDELETED = @@ROWCOUNT;
+        
+        /* Reset CONTEXT_INFO to previous value */
+        if not @contextCache is null begin
+          set CONTEXT_INFO @CONTEXTCACHE;
+        end
+      end
+  end try
+  
+  begin catch
+    if @SELECTION <> '' begin
+      set @SELECTIONTABLESQL = 'drop table ' + @SELECTION;
+      exec sp_executesql @SELECTIONTABLESQL 
+    end
+    
+    exec dbo.USP_RAISE_ERROR;
+    return 1;
+  end catch
+		]]>
+	</CreateProcedureSQL>
+
+  <ExpectedDBExceptions>
+    <CustomExceptions xmlns="bb_appfx_commontypes">
+      <Exception SearchText="UFN_IDSETREADER_GETRESULTS_GUID" CustomErrorMsgResourceKey="$$an_invalid_selection_was_specified_for_this_global_change">
+        <CustomErrorMsg>An invalid selection was specified for this global change.</CustomErrorMsg>
+      </Exception>
+    </CustomExceptions>
+  </ExpectedDBExceptions>
+
+	<ParametersFormMetaData>
+    <FormMetaData xmlns="bb_appfx_commontypes">
+      <FormFields>
+        <FormField FieldID="IDSETREGISTERID" DataType="Guid" Caption="Selection" CaptionResourceKey="$$selection">
+          <SearchList SearchListID="98d0070e-c4a7-495b-a438-2ac12da79068" EnableQuickFind="true">
+            <FormFieldOverrides>
+              <FormFieldOverride FieldID="RECORDTYPEID" Caption="Record type" ReadOnly="true" DefaultValueText="Fields!RECORDTYPEID" />
+            </FormFieldOverrides>
+          </SearchList>
+        </FormField>
+        <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
+        <FormField FieldID="ATTRIBUTECATEGORYID" DataType="Guid" Required="true" Caption="Category" CaptionResourceKey="$$category">
+          <SimpleDataList SimpleDataListID="958132a3-762a-4844-b7a1-f3a3098da95a">
+            <Params>
+              <Param ID="RECORDTYPE">
+                <Value>Interaction</Value>
+              </Param>
+            </Params>
+          </SimpleDataList>
+        </FormField>
+        <FormField FieldID="DELETETYPE" DataType="TinyInt" Caption="Delete type" Description="Radio buttons for choosing which style of delete to use." DefaultValueText="0" CaptionResourceKey="$$delete_type" DescriptionResourceKey="$$radio_buttons_for_choosing_which_style_of_delete_to_use">
+          <ValueList UseRadioButtons="true">
+            <Items>
+              <Item LabelResourceKey="$$delete_all_values">
+                <Value>0</Value>
+                <Label>Delete all values</Label>
+              </Item>
+              <Item LabelResourceKey="$$delete_only_attributes_with_the_value:">
+                <Value>1</Value>
+                <Label>Delete only attributes with the value:</Label>
+              </Item>
+            </Items>
+          </ValueList>
+        </FormField>
+        <FormField FieldID="STRINGVALUE" MaxLength="250" Caption="Value" CaptionResourceKey="$$value" />
+        <FormField FieldID="NUMBERVALUE" DataType="Integer" Caption="Value" CaptionResourceKey="$$value" />
+        <FormField FieldID="MONEYVALUE" DataType="Money" Caption="Value" CaptionResourceKey="$$value">
+          <CurrencyField CurrencyFieldID="CURRENCYID" />
+        </FormField>
+        <FormField FieldID="DATEVALUE" DataType="Date" Caption="Value" CaptionResourceKey="$$value" />
+        <FormField FieldID="BOOLEANVALUE" DataType="TinyInt" Caption="Value" CaptionResourceKey="$$value">
+          <ValueList>
+            <Items>
+              <Item LabelResourceKey="$$no">
+                <Value>0</Value>
+                <Label>No</Label>
+              </Item>
+              <Item LabelResourceKey="$$yes">
+                <Value>1</Value>
+                <Label>Yes</Label>
+              </Item>
+            </Items>
+          </ValueList>
+        </FormField>
+        <FormField FieldID="CODETABLEVALUE" DataType="Guid" Caption="Value" CaptionResourceKey="$$value">
+          <CodeTable CodeTableName="ADDRESSTYPECODE" />
+        </FormField>
+        <FormField FieldID="FUZZYDATEVALUE" DataType="FuzzyDate" Caption="Value" CaptionResourceKey="$$value" />
+        <FormField FieldID="CONSTITUENTIDVALUE" DataType="Guid" Caption="Value" CaptionResourceKey="$$value">
+          <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true">
+            <AddDataForms>
+              <AddDataForm ID="1986f0cf-efb6-48b3-afde-950b57562434" Caption="Individual" CaptionResourceKey="$$individual" />
+              <AddDataForm ID="d846a816-46c7-470e-9ad0-973b2730e836" Caption="Household" CaptionResourceKey="$$household" />
+              <AddDataForm ID="f0f6426a-fccd-48bb-846b-eb3d1a4a0ed4" Caption="Group" CaptionResourceKey="$$group" />
+              <AddDataForm ID="ca3ed110-a5f0-4b5b-8eb7-0616e0a82e8e" Caption="Organization" CaptionResourceKey="$$organization" />
+            </AddDataForms>
+          </SearchList>
+        </FormField>
+        <FormField FieldID="HOURMINUTEVALUE" DataType="HourMinute" Caption="Value" CaptionResourceKey="$$value" />
+        <FormField FieldID="MEMOVALUE" Caption="Value" CaptionResourceKey="$$value" />
+        <FormField FieldID="ATTRIBUTECATEGORIES" ReadOnly="true" AvailableToClient="false">
+          <Collection Serialization="Attribute">
+            <Fields>
+              <FormField FieldID="ID" DataType="Guid" Caption="ID" CaptionResourceKey="$$id" />
+              <FormField FieldID="DATATYPECODE" DataType="Integer" Caption="DATATYPECODE" CaptionResourceKey="$$datatypecode" />
+              <FormField FieldID="CONSTITUENTSEARCHLISTCATALOGID" DataType="Guid" Caption="CONSTITUENTSEARCHLISTCATALOGID" CaptionResourceKey="$$constituentsearchlistcatalogid" />
+              <FormField FieldID="CODETABLENAME" Caption="CODETABLENAME" CaptionResourceKey="$$codetablename" />
+            </Fields>
+          </Collection>
+        </FormField>
+        <FormField FieldID="CURRENCYID" DataType="Guid" Caption="Currency" CaptionResourceKey="$$currency">
+          <SimpleDataList SimpleDataListID="13612288-b37e-409d-ba52-6ab31637ddd6" />
+        </FormField>
+      </FormFields>
+      <UIActions>
+        <UIAction ActionID="QUERYEDIT">
+          <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
+        </UIAction>
+      </UIActions>
+    </FormMetaData>
+  </ParametersFormMetaData>
+	
+</GlobalChangeSpec>

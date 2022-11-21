@@ -480,6 +480,11 @@ as
         <FormField FieldID="STARTDATE" DataType="Date" Caption="Start date" CaptionResourceKey="$$start_date" />
         <FormField FieldID="ENDDATE" DataType="Date" Caption="End date" CaptionResourceKey="$$end_date" />
       </FormFields>
+      <UIActions>
+        <UIAction ActionID="QUERYEDIT">
+          <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
+        </UIAction>
+      </UIActions>
     </FormMetaData>
   </ParametersFormMetaData>
   
