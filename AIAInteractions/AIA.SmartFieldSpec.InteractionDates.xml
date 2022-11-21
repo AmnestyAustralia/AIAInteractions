@@ -1,0 +1,204 @@
+﻿<SmartFieldSpec
+  xmlns="bb_appfx_smartfield"
+  xmlns:c="bb_appfx_commontypes" 
+  ID="21e0e4db-2ded-4bf0-a289-605879793fef"
+  Name="Interaction dates (AIA)"
+  Description="REPLACE_WITH_DESCRIPTION"
+  Author="Danny Smith (AIA)"
+  SPName="USR_AIA_USP_SMARTFIELD_INTERACTIONDATES"
+  DataType="Date" 
+  RecordType="Constituent" 
+  DisplayName="Interaction dates (AIA)"
+  SmartFieldFolder="Constituent\Interaction"
+  >
+
+  <!-- describe the SP used to calculate the smart field values -->
+  <CreateProcedureSQL>
+    <![CDATA[
+create procedure dbo.USR_AIA_USP_SMARTFIELD_INTERACTIONDATES
+(
+  @IDSETREGISTERID uniqueidentifier,
+  @STATUSCODE int,
+  @DATEFIELD nvarchar(20),
+  @DATETYPE nvarchar(10),
+  @ACTUALSTARTDATE date,
+  @ACTUALENDDATE date,
+  @PLANNEDSTARTDATE date,
+  @PLANNEDENDDATE date,
+  @OWNER uniqueidentifier,
+  @INTERACTIONTYPECODEID uniqueidentifier,
+  @INTERACTIONCATEGORYID uniqueidentifier,
+  @INTERACTIONSUBCATEGORYID uniqueidentifier,
+  @ASOF datetime 
+)
+with execute as owner
+as
+  if @ASOF is null 
+    set @ASOF = getdate()
+ 
+  declare @idsql as nvarchar(50) = ' and (ID in (select ID from [UFN_IDSETREADER_GETRESULTS_GUID](@IDSETREGISTERID)))';
+
+  if(@IDSETREGISTERID is null)
+    set @idsql = '';
+
+  declare @sql as nvarchar(max);
+ 
+  set @sql = '';
+  set @sql = @sql + char(10) + '
+    select CONS.ID, ' + @DATETYPE + '(' + @DATEFIELD + ') as VALUE
+    from
+      (
+        select *
+        from   dbo.INTERACTION
+        where   
+          ( 
+            (@ACTUALSTARTDATE is null and @ACTUALENDDATE is null) 
+           or (@ACTUALSTARTDATE is not null and @ACTUALENDDATE is null and ACTUALDATE >= @ACTUALSTARTDATE) 
+           or (@ACTUALENDDATE is not null and @ACTUALSTARTDATE is null and ACTUALDATE <= @ACTUALENDDATE)
+           or (@ACTUALSTARTDATE is not null and @ACTUALENDDATE is not null and ACTUALDATE >= @ACTUALSTARTDATE and ACTUALDATE <= @ACTUALENDDATE)
+         )
+         and (@INTERACTIONSUBCATEGORYID is null or (INTERACTIONSUBCATEGORYID=@INTERACTIONSUBCATEGORYID))
+         and (@INTERACTIONCATEGORYID  is null or (INTERACTIONSUBCATEGORYID in (select ID from INTERACTIONSUBCATEGORY where INTERACTIONCATEGORYID = @INTERACTIONCATEGORYID)))
+         and (
+               @PLANNEDSTARTDATE is null and @PLANNEDENDDATE is null
+             or (@PLANNEDSTARTDATE is not null and @PLANNEDENDDATE is null and EXPECTEDDATE >= @PLANNEDSTARTDATE) 
+             or (@PLANNEDSTARTDATE is null and @PLANNEDENDDATE is not null and EXPECTEDDATE <= @PLANNEDENDDATE)
+             or (@PLANNEDSTARTDATE is not null and @PLANNEDENDDATE is not null and EXPECTEDDATE >= @PLANNEDSTARTDATE and EXPECTEDDATE <= @PLANNEDENDDATE)
+           )
+         and (@OWNER is null or (FUNDRAISERID = @OWNER))
+         and (@STATUSCODE is null or (STATUSCODE = @STATUSCODE))
+         and (@INTERACTIONTYPECODEID is null or (INTERACTIONTYPECODEID = @INTERACTIONTYPECODEID))
+         ' + @idsql + '
+     ) INTR
+      right join 
+      CONSTITUENT CONS on CONS.ID = INTR.CONSTITUENTID
+      group by CONS.ID';
+
+	print(@sql);
+
+  exec sp_executesql @sql, N'
+    @IDSETREGISTERID uniqueidentifier,
+    @STATUSCODE int,
+    @ACTUALSTARTDATE date,
+    @ACTUALENDDATE date,
+    @PLANNEDSTARTDATE date,
+    @PLANNEDENDDATE date,
+    @OWNER uniqueidentifier,
+    @INTERACTIONTYPECODEID uniqueidentifier,
+    @INTERACTIONCATEGORYID uniqueidentifier,
+    @INTERACTIONSUBCATEGORYID uniqueidentifier,
+    @ASOF datetime',
+    @IDSETREGISTERID,
+    @STATUSCODE,
+    @ACTUALSTARTDATE,
+    @ACTUALENDDATE,
+    @PLANNEDSTARTDATE,
+    @PLANNEDENDDATE,
+    @OWNER,
+    @INTERACTIONTYPECODEID,
+    @INTERACTIONCATEGORYID,
+    @INTERACTIONSUBCATEGORYID,
+    @ASOF
+  ;
+
+    ]]>
+  </CreateProcedureSQL>
+
+  <!-- describe any parameters (other than the ASOF date) defined on the SP -->
+  <FormMetaData xmlns="bb_appfx_commontypes">
+    <FormFields>
+      <FormField FieldID="IDSETREGISTERID" DataType="Guid" Caption="Selection">
+        <SearchList SearchListID="98d0070e-c4a7-495b-a438-2ac12da79068" EnableQuickFind="true">
+          <FormFieldOverrides>
+            <FormFieldOverride FieldID="RECORDTYPEID" Caption="Record type" ReadOnly="true" DefaultValueText="Fields!RECORDTYPEID" />
+          </FormFieldOverrides>
+        </SearchList>
+      </FormField>
+      <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
+      <FormField FieldID="DATEFIELD" DataType="String" Required="true" Caption="Date field to return" DefaultValueText="Date">
+        <ValueList>
+          <Items>
+            <Item>
+              <Value>DATE</Value>
+              <Label>Date</Label>
+            </Item>
+            <Item>
+              <Value>ACTUALDATE</Value>
+              <Label>Actual Date</Label>
+            </Item>
+            <Item>
+              <Value>EXPECTEDDATE</Value>
+              <Label>Expected Date</Label>
+            </Item>
+          </Items>
+        </ValueList>
+      </FormField>
+      <FormField FieldID="DATETYPE" DataType="String" Required="true" Caption="Value to return" DefaultValueText="">
+        <ValueList>
+          <Items>
+            <Item>
+              <Value>MIN</Value>
+              <Label>Earliest date</Label>
+            </Item>
+            <Item>
+              <Value>MAX</Value>
+              <Label>Latest date</Label>
+            </Item>
+          </Items>
+        </ValueList>
+      </FormField>
+      <FormField FieldID="STATUSCODE" DataType="TinyInt" Caption="Status" DefaultValueText="0">
+        <ValueList>
+          <Items>
+            <Item LabelResourceKey="$$pending">
+              <Value>1</Value>
+              <Label>Pending</Label>
+            </Item>
+            <Item LabelResourceKey="$$completed">
+              <Value>2</Value>
+              <Label>Completed</Label>
+            </Item>
+            <Item LabelResourceKey="$$canceled">
+              <Value>4</Value>
+              <Label>Canceled</Label>
+            </Item>
+            <Item LabelResourceKey="$$declined">
+              <Value>5</Value>
+              <Label>Declined</Label>
+            </Item>
+          </Items>
+        </ValueList>
+      </FormField>
+      <FormField FieldID="ACTUALSTARTDATE" DataType="Date" Caption="Actual date from" />
+      <FormField FieldID="ACTUALENDDATE" DataType="Date" Caption="Actual date to" />
+      <FormField FieldID="PLANNEDSTARTDATE" DataType="Date" Caption="Expected date from" />
+      <FormField FieldID="PLANNEDENDDATE" DataType="Date" Caption="Expected date to" />
+      <FormField FieldID="OWNER" DataType="Guid" Caption="Owner">
+        <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true">
+          <FormFieldOverrides>
+            <FormFieldOverride FieldID="INCLUDEORGANIZATIONS" Caption="Organizations" ReadOnly="true" DefaultValueText="False" />
+            <FormFieldOverride FieldID="EXCLUDEHOUSEHOLDS" Caption="EXCLUDEHOUSEHOLDS" Hidden="true" DefaultValueText="True" />
+            <FormFieldOverride FieldID="INCLUDENONCONSTITUENTRECORDS" DefaultValueText="true" />
+            <FormFieldOverride FieldID="FORMHEADER" DefaultValueText="Record Search" />
+          </FormFieldOverrides>
+        </SearchList>
+      </FormField>
+      <FormField FieldID="INTERACTIONTYPECODEID" DataType="Guid" Caption="Contact method">
+        <CodeTable CodeTableName="INTERACTIONTYPECODE" />
+      </FormField>
+      <FormField FieldID="INTERACTIONCATEGORYID" DataType="Guid" Caption="Category">
+        <SimpleDataList SimpleDataListID="cbba7545-b66f-44ac-aa24-d9c2f8cbc4ec" />
+      </FormField>
+      <FormField FieldID="INTERACTIONSUBCATEGORYID" DataType="Guid" Caption="Subcategory">
+        <SimpleDataList SimpleDataListID="0eacc39b-07d1-4641-8774-e319559535a7">
+          <Params>
+            <Param ID="INTERACTIONCATEGORYID">
+              <Value>Fields!INTERACTIONCATEGORYID</Value>
+            </Param>
+          </Params>
+        </SimpleDataList>
+      </FormField>
+    </FormFields>
+  </FormMetaData>
+
+</SmartFieldSpec>
