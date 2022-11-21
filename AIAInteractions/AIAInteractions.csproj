@@ -58,6 +58,9 @@
     <None Include="Catalog.ruleset" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AIA.GlobalChangeSpec.AddInteractionAttribute.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="AIA.SmartFieldSpec.InteractionDates.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
