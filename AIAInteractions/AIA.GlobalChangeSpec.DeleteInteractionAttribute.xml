@@ -3,7 +3,7 @@
   xmlns:c="bb_appfx_commontypes"
 	ID="7937a8f3-f1c5-4031-b58c-5e7f932b9e95"
   Name="Delete interaction attribute (AIA)"
-  Description="Deletes an attribute from an interaction record"
+  Description="Deletes an attribute from an interaction record."
   Author="Danny Smith (AIA)"
   DisplayName="Delete interaction attribute (AIA)"
   GlobalChangeFolder="Constituent\Interaction"

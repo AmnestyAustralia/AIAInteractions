@@ -3,7 +3,7 @@
   xmlns:c="bb_appfx_commontypes"
   ID="c443f705-3595-41ba-bd27-3782d3cb4edb"
   Name="Add interaction attribute (AIA)"
-  Description="Adds an attribute to an interaction record"
+  Description="Adds an attribute to an interaction record."
   Author="Danny Smith (AIA)"
   DisplayName="Add interaction attribute (AIA)"
   GlobalChangeFolder="Constituent\Interaction"
