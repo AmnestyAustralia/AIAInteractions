@@ -480,6 +480,12 @@ as
         <FormField FieldID="STARTDATE" DataType="Date" Caption="Start date" CaptionResourceKey="$$start_date" />
         <FormField FieldID="ENDDATE" DataType="Date" Caption="End date" CaptionResourceKey="$$end_date" />
       </FormFields>
+      <WebUIComponent>
+        <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIAAddInteractionAttributeUIModel" />
+        <WebUI>
+          <ExternalResource Url="browser/htmlforms/custom/AIA/AIAAddInteractionAttribute.html" />
+        </WebUI>
+      </WebUIComponent>
       <UIActions>
         <UIAction ActionID="QUERYEDIT">
           <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
