@@ -1,0 +1,10 @@
+﻿<UIModelWizardMetadata>
+  <SpecFileName>AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml</SpecFileName>
+  <Namespace></Namespace>
+  <ClassName>AIADeleteInteractionAttributeUIModel</ClassName>
+  <HtmlInfo GenerateHtml="true">
+    <HtmlFile>AIADeleteInteractionAttribute.html</HtmlFile>
+    <HtmlFolder>htmlforms\custom\AIA\</HtmlFolder>
+  </HtmlInfo>
+  <GenerateFromDatabase>true</GenerateFromDatabase>
+</UIModelWizardMetadata>

@@ -80,6 +80,13 @@
       <DependentUpon>AIAAddInteractionAttributeUIModel.cs</DependentUpon>
     </Compile>
     <Compile Include="AIAAddInteractionAttributeUIModel.cs" />
+    <Compile Include="AIADeleteInteractionAttributeATTRIBUTECATEGORIESUIModel.CodeGen.cs">
+      <DependentUpon>AIADeleteInteractionAttributeUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIADeleteInteractionAttributeUIModel.CodeGen.cs">
+      <DependentUpon>AIADeleteInteractionAttributeUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIADeleteInteractionAttributeUIModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -88,11 +95,18 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml">
+      <Link>LinkedSpecs\AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml</Link>
+    </None>
+    <Content Include="htmlforms\custom\AIA\AIADeleteInteractionAttribute.html" />
     <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.AddInteractionAttribute.xml">
       <Link>LinkedSpecs\AIA.GlobalChangeSpec.AddInteractionAttribute.xml</Link>
     </None>
     <Content Include="AIAAddInteractionAttributeUIModel.xml">
       <DependentUpon>AIAAddInteractionAttributeUIModel.cs</DependentUpon>
+    </Content>
+    <Content Include="AIADeleteInteractionAttributeUIModel.xml">
+      <DependentUpon>AIADeleteInteractionAttributeUIModel.cs</DependentUpon>
     </Content>
     <Content Include="htmlforms\custom\AIA\AIAAddInteractionAttribute.html" />
   </ItemGroup>

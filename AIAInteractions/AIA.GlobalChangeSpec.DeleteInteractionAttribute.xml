@@ -345,6 +345,12 @@ as
           <SimpleDataList SimpleDataListID="13612288-b37e-409d-ba52-6ab31637ddd6" />
         </FormField>
       </FormFields>
+      <WebUIComponent>
+        <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIADeleteInteractionAttributeUIModel" />
+        <WebUI>
+          <ExternalResource Url="browser/htmlforms/custom/AIA/AIADeleteInteractionAttribute.html" />
+        </WebUI>
+      </WebUIComponent>
       <UIActions>
         <UIAction ActionID="QUERYEDIT">
           <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
