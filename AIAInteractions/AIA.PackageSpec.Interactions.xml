@@ -1,0 +1,16 @@
+<PackageSpec 
+    xmlns="bb_appfx_package"
+    xmlns:c="bb_appfx_commontypes"
+    ID="76478840-e2ec-46b7-898c-333a72a775ea"
+    Name="AIA Package Interactions"
+    Description="A package defining AIA interaction features"
+    Author="Danny Smith (AIA)"
+    >
+
+  <c:DependencyList>
+    <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.AddInteractionAttribute.xml" />
+    <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml" />
+    <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.SmartFieldSpec.InteractionDates.xml" />
+  </c:DependencyList>
+
+</PackageSpec>
