@@ -1,16 +1,16 @@
 ﻿<SmartFieldSpec
   xmlns="bb_appfx_smartfield"
-  xmlns:c="bb_appfx_commontypes" 
+  xmlns:c="bb_appfx_commontypes"
   ID="21e0e4db-2ded-4bf0-a289-605879793fef"
   Name="Interaction dates (AIA)"
   Description="Returns the earliest or latest interaction date meeting the provided criteria."
   Author="Danny Smith (AIA)"
   SPName="USR_AIA_USP_SMARTFIELD_INTERACTIONDATES"
-  DataType="Date" 
-  RecordType="Constituent" 
+  DataType="Date"
+  RecordType="Constituent"
   DisplayName="Interaction dates (AIA)"
   SmartFieldFolder="Constituent\Interaction"
-  >
+>
 
   <!-- describe the SP used to calculate the smart field values -->
   <CreateProcedureSQL>
@@ -199,6 +199,17 @@ as
         </SimpleDataList>
       </FormField>
     </FormFields>
+    <WebUIComponent>
+      <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIAInteractionDatesUIModel" />
+      <WebUI>
+        <ExternalResource Url="browser/htmlforms/custom/AIA/AIAInteractionDates.html" />
+      </WebUI>
+    </WebUIComponent>
+    <UIActions>
+      <UIAction ActionID="QUERYEDIT">
+        <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
+      </UIAction>
+    </UIActions>
   </FormMetaData>
 
 </SmartFieldSpec>

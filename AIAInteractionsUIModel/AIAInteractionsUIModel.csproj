@@ -87,6 +87,10 @@
       <DependentUpon>AIADeleteInteractionAttributeUIModel.cs</DependentUpon>
     </Compile>
     <Compile Include="AIADeleteInteractionAttributeUIModel.cs" />
+    <Compile Include="AIAInteractionDatesUIModel.CodeGen.cs">
+      <DependentUpon>AIAInteractionDatesUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIAInteractionDatesUIModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +99,16 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="..\AIAInteractions\AIA.SmartFieldSpec.InteractionDates.xml">
+      <Link>LinkedSpecs\AIA.SmartFieldSpec.InteractionDates.xml</Link>
+    </None>
+    <Content Include="htmlforms\custom\AIA\AIAInteractionDates.html" />
     <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml">
       <Link>LinkedSpecs\AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml</Link>
     </None>
+    <Content Include="AIAInteractionDatesUIModel.xml">
+      <DependentUpon>AIAInteractionDatesUIModel.cs</DependentUpon>
+    </Content>
     <Content Include="htmlforms\custom\AIA\AIADeleteInteractionAttribute.html" />
     <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.AddInteractionAttribute.xml">
       <Link>LinkedSpecs\AIA.GlobalChangeSpec.AddInteractionAttribute.xml</Link>
