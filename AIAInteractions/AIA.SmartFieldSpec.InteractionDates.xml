@@ -36,7 +36,7 @@ as
   if @ASOF is null 
     set @ASOF = getdate()
  
-  declare @idsql as nvarchar(50) = ' and (ID in (select ID from [UFN_IDSETREADER_GETRESULTS_GUID](@IDSETREGISTERID)))';
+  declare @idsql as nvarchar(100) = ' and (ID in (select ID from [UFN_IDSETREADER_GETRESULTS_GUID](@IDSETREGISTERID)))';
 
   if(@IDSETREGISTERID is null)
     set @idsql = '';
