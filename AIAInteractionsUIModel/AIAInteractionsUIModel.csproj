@@ -91,6 +91,10 @@
       <DependentUpon>AIAInteractionDatesUIModel.cs</DependentUpon>
     </Compile>
     <Compile Include="AIAInteractionDatesUIModel.cs" />
+    <Compile Include="AIAUpdateInteractionMetadataUIModel.CodeGen.cs">
+      <DependentUpon>AIAUpdateInteractionMetadataUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIAUpdateInteractionMetadataUIModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -99,9 +103,18 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.UpdateInteraction.xml">
+      <Link>LinkedSpecs\AIA.GlobalChangeSpec.UpdateInteraction.xml</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="htmlforms\custom\AIA\AIAUpdateInteractionMetadata.html" />
     <None Include="..\AIAInteractions\AIA.SmartFieldSpec.InteractionDates.xml">
       <Link>LinkedSpecs\AIA.SmartFieldSpec.InteractionDates.xml</Link>
+      <SubType>Designer</SubType>
     </None>
+    <Content Include="AIAUpdateInteractionMetadataUIModel.xml">
+      <DependentUpon>AIAUpdateInteractionMetadataUIModel.cs</DependentUpon>
+    </Content>
     <Content Include="htmlforms\custom\AIA\AIAInteractionDates.html" />
     <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml">
       <Link>LinkedSpecs\AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml</Link>

@@ -1,0 +1,120 @@
+﻿<GlobalChangeSpec
+  xmlns="bb_appfx_globalchange"
+  xmlns:c="bb_appfx_commontypes"
+  ID="417da8fb-fa89-4e73-938f-ea9ae93135fa"
+  Name="Update interaction metadata (AIA)"
+  Description="Updates interaction metadata fields."
+  Author="Danny Smith (AIA)"
+  DisplayName="Update interaction metadata (AIA)"
+  GlobalChangeFolder="Constituent\Interaction"
+  SPName="USR_AIA_USP_GLOBALCHANGE_UPDATEINTERACTION"
+>
+
+  <!-- describe the SP that performs the global change operation -->
+  <CreateProcedureSQL>
+    <![CDATA[
+create procedure dbo.USR_AIA_USP_GLOBALCHANGE_UPDATEINTERACTION
+(
+  @IDSETREGISTERID uniqueidentifier               = null,
+  @CHANGEAGENTID uniqueidentifier                 = null,
+  @ASOF as datetime                               = null,
+  @NUMBERADDED int                                = 0 output,
+  @NUMBEREDITED int                               = 0 output,
+  @NUMBERDELETED int                              = 0 output,
+  @OBJECTIVE nvarchar(100)                        = '' output,
+  @OWNER uniqueidentifier                         = null output,
+  @INTERACTIONTYPECODEID uniqueidentifier         = null output,
+  @INTERACTIONCATEGORYID uniqueidentifier         = null output,
+  @INTERACTIONSUBCATEGORYID uniqueidentifier      = null output,
+  @COMMENT nvarchar(max)                          = '' output
+)
+as      
+  set nocount off;
+
+  declare @CURRENTDATE datetime
+  set @CURRENTDATE   = getdate();
+  set @NUMBERADDED   = 0;
+  set @NUMBEREDITED  = 0;
+  set @NUMBERDELETED = 0; 
+
+  if @CHANGEAGENTID is null
+    exec dbo.USP_CHANGEAGENT_GETORCREATECHANGEAGENT @CHANGEAGENTID output;
+  
+  begin try
+    update 
+      intr
+    set  
+      intr.OBJECTIVE = case when @OBJECTIVE = '' or @OBJECTIVE is null then intr.OBJECTIVE else @OBJECTIVE end,
+      intr.FUNDRAISERID = case when @OWNER is null then intr.FUNDRAISERID else @OWNER end,
+      intr.INTERACTIONTYPECODEID = case when @INTERACTIONTYPECODEID is null then intr.INTERACTIONTYPECODEID else @INTERACTIONTYPECODEID end,
+      intr.INTERACTIONSUBCATEGORYID = case when @INTERACTIONSUBCATEGORYID is null then intr.INTERACTIONSUBCATEGORYID else @INTERACTIONSUBCATEGORYID end,
+      intr.COMMENT = case when @COMMENT = '' or @COMMENT is null then intr.COMMENT else @COMMENT end 
+
+    from 
+      dbo.[UFN_IDSETREADER_GETRESULTS_GUID](@IDSETREGISTERID) Id
+    inner join 
+      dbo.INTERACTION intr on intr.ID = Id.ID
+    set 
+      @NUMBEREDITED = @@ROWCOUNT
+  end try
+
+  begin catch
+    exec dbo.USP_RAISE_ERROR;
+    return 1;
+  end catch
+    ]]>
+  </CreateProcedureSQL>
+
+  <ParametersFormMetaData>
+    <FormMetaData xmlns="bb_appfx_commontypes">
+      <FormFields>
+        <FormField FieldID="IDSETREGISTERID" DataType="Guid" Required="true" Caption="Selection">
+          <SearchList SearchListID="98d0070e-c4a7-495b-a438-2ac12da79068" EnableQuickFind="true">
+            <FormFieldOverrides>
+              <FormFieldOverride FieldID="RECORDTYPEID" Caption="Record type" ReadOnly="true" DefaultValueText="Fields!RECORDTYPEID" />
+            </FormFieldOverrides>
+          </SearchList>
+        </FormField>
+        <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
+        <FormField FieldID="OBJECTIVE" MaxLength="100" Caption="Summary" DefaultValueText="" CaptionResourceKey="$$summary" />
+        <FormField FieldID="OWNER" DataType="Guid" Caption="Owner">
+          <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true">
+            <FormFieldOverrides>
+              <FormFieldOverride FieldID="INCLUDEORGANIZATIONS" Caption="Organizations" ReadOnly="true" DefaultValueText="False" />
+              <FormFieldOverride FieldID="EXCLUDEHOUSEHOLDS" Caption="EXCLUDEHOUSEHOLDS" Hidden="true" DefaultValueText="True" />
+              <FormFieldOverride FieldID="INCLUDENONCONSTITUENTRECORDS" DefaultValueText="true" />
+              <FormFieldOverride FieldID="FORMHEADER" DefaultValueText="Record Search" />
+            </FormFieldOverrides>
+          </SearchList>
+        </FormField>
+        <FormField FieldID="INTERACTIONTYPECODEID" DataType="Guid" Caption="Contact method">
+          <CodeTable CodeTableName="INTERACTIONTYPECODE" />
+        </FormField>
+        <FormField FieldID="INTERACTIONCATEGORYID" DataType="Guid" Caption="Category">
+          <SimpleDataList SimpleDataListID="cbba7545-b66f-44ac-aa24-d9c2f8cbc4ec" />
+        </FormField>
+        <FormField FieldID="INTERACTIONSUBCATEGORYID" DataType="Guid" Caption="Subcategory">
+          <SimpleDataList SimpleDataListID="0eacc39b-07d1-4641-8774-e319559535a7">
+            <Params>
+              <Param ID="INTERACTIONCATEGORYID">
+                <Value>Fields!INTERACTIONCATEGORYID</Value>
+              </Param>
+            </Params>
+          </SimpleDataList>
+        </FormField>
+        <FormField FieldID="COMMENT" Caption="Comment" DefaultValueText="" Multiline="true" />
+      </FormFields>
+      <WebUIComponent>
+        <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIAUpdateInteractionMetadataUIModel" />
+        <WebUI>
+          <ExternalResource Url="browser/htmlforms/custom/AIA/AIAUpdateInteractionMetadata.html" />
+        </WebUI>
+      </WebUIComponent>
+      <UIActions>
+        <UIAction ActionID="QUERYEDIT">
+          <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
+        </UIAction>
+      </UIActions>
+    </FormMetaData>
+  </ParametersFormMetaData>
+</GlobalChangeSpec>

@@ -1,0 +1,10 @@
+﻿<UIModelWizardMetadata>
+  <SpecFileName>AIA.GlobalChangeSpec.UpdateInteraction.xml</SpecFileName>
+  <Namespace></Namespace>
+  <ClassName>AIAUpdateInteractionMetadataUIModel</ClassName>
+  <HtmlInfo GenerateHtml="true">
+    <HtmlFile>AIAUpdateInteractionMetadata.html</HtmlFile>
+    <HtmlFolder>htmlforms\custom\AIA\</HtmlFolder>
+  </HtmlInfo>
+  <GenerateFromDatabase>true</GenerateFromDatabase>
+</UIModelWizardMetadata>

@@ -58,16 +58,23 @@
     <None Include="Catalog.ruleset" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="AIA.GlobalChangeSpec.AddInteractionAttribute.xml" />
+    <EmbeddedResource Include="AIA.GlobalChangeSpec.AddInteractionAttribute.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AIA.SmartFieldSpec.InteractionDates.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml" />
+    <EmbeddedResource Include="AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AIA.PackageSpec.Interactions.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AIA.GlobalChangeSpec.UpdateInteraction.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
