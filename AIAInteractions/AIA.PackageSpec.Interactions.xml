@@ -11,6 +11,7 @@
     <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.AddInteractionAttribute.xml" />
     <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml" />
     <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.SmartFieldSpec.InteractionDates.xml" />
+    <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.UpdateInteractionMetadata.xml" />
   </c:DependencyList>
 
 </PackageSpec>

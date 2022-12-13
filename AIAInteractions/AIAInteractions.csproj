@@ -74,7 +74,9 @@
     <EmbeddedResource Include="AIA.PackageSpec.Interactions.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="AIA.GlobalChangeSpec.UpdateInteraction.xml" />
+    <EmbeddedResource Include="AIA.GlobalChangeSpec.UpdateInteractionMetadata.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

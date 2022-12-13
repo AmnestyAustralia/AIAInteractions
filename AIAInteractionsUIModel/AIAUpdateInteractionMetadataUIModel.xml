@@ -1,5 +1,5 @@
 ﻿<UIModelWizardMetadata>
-  <SpecFileName>AIA.GlobalChangeSpec.UpdateInteraction.xml</SpecFileName>
+  <SpecFileName>AIA.GlobalChangeSpec.UpdateInteractionMetadata.xml</SpecFileName>
   <Namespace></Namespace>
   <ClassName>AIAUpdateInteractionMetadataUIModel</ClassName>
   <HtmlInfo GenerateHtml="true">
