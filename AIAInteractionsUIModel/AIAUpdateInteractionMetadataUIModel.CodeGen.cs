@@ -72,7 +72,7 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
         //
         //_objective
         //
-        _objective.Name = "OBJECTIVE";
+        _objective.Name = "SUMMARY";
         _objective.Caption = "Summary";
         _objective.MaxLength = 100;
         this.Fields.Add(_objective);
@@ -148,7 +148,7 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
     /// </summary>
     [System.ComponentModel.Description("Summary")]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
-	public global::Blackbaud.AppFx.UIModeling.Core.StringField @OBJECTIVE {
+	public global::Blackbaud.AppFx.UIModeling.Core.StringField @SUMMARY {
 		get { return _objective; }
 	}
 
