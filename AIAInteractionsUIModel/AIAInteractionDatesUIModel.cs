@@ -11,7 +11,7 @@ namespace AIAInteractionsUIModel
         {
             bool flag = _interactioncategoryid.HasValue() && _interactioncategoryid.Value != Guid.Empty;
             _interactionsubcategoryid.Enabled = flag;
-            _interactionsubcategoryid.Required = flag;
+            //_interactionsubcategoryid.Required = flag;
         }
 
         private void _interactioncategoryid_ValueChanged(object sender, ValueChangedEventArgs e)
