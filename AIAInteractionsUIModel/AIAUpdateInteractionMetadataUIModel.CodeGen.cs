@@ -26,6 +26,8 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
     private global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid> _idsetregisterid;
     private global::Blackbaud.AppFx.UIModeling.Core.GuidField _recordtypeid;
     private global::Blackbaud.AppFx.UIModeling.Core.StringField _objective;
+    private global::Blackbaud.AppFx.UIModeling.Core.DateField _actualdate;
+    private global::Blackbaud.AppFx.UIModeling.Core.DateField _expecteddate;
     private global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid> _owner;
     private global::Blackbaud.AppFx.UIModeling.Core.CodeTableField _interactiontypecodeid;
     private global::Blackbaud.AppFx.UIModeling.Core.SimpleDataListField<System.Guid> _interactioncategoryid;
@@ -41,6 +43,8 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
         _idsetregisterid = new global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid>();
         _recordtypeid = new global::Blackbaud.AppFx.UIModeling.Core.GuidField();
         _objective = new global::Blackbaud.AppFx.UIModeling.Core.StringField();
+        _actualdate = new global::Blackbaud.AppFx.UIModeling.Core.DateField();
+        _expecteddate = new global::Blackbaud.AppFx.UIModeling.Core.DateField();
         _owner = new global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid>();
         _interactiontypecodeid = new global::Blackbaud.AppFx.UIModeling.Core.CodeTableField();
         _interactioncategoryid = new global::Blackbaud.AppFx.UIModeling.Core.SimpleDataListField<System.Guid>();
@@ -76,6 +80,18 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
         _objective.Caption = "Summary";
         _objective.MaxLength = 100;
         this.Fields.Add(_objective);
+        //
+        //_actualdate
+        //
+        _actualdate.Name = "ACTUALDATE";
+        _actualdate.Caption = "Actual date";
+        this.Fields.Add(_actualdate);
+        //
+        //_expecteddate
+        //
+        _expecteddate.Name = "EXPECTEDDATE";
+        _expecteddate.Caption = "Expected date";
+        this.Fields.Add(_expecteddate);
         //
         //_owner
         //
@@ -150,6 +166,24 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
     [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
 	public global::Blackbaud.AppFx.UIModeling.Core.StringField @SUMMARY {
 		get { return _objective; }
+	}
+
+    /// <summary>
+    /// Actual date
+    /// </summary>
+    [System.ComponentModel.Description("Actual date")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.DateField @ACTUALDATE {
+		get { return _actualdate; }
+	}
+
+    /// <summary>
+    /// Expected date
+    /// </summary>
+    [System.ComponentModel.Description("Expected date")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.DateField @EXPECTEDDATE {
+		get { return _expecteddate; }
 	}
 
     /// <summary>

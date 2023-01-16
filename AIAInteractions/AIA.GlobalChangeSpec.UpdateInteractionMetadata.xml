@@ -22,6 +22,8 @@ create procedure dbo.USR_AIA_USP_GLOBALCHANGE_UPDATEINTERACTION
   @NUMBEREDITED int                               = 0 output,
   @NUMBERDELETED int                              = 0 output,
   @SUMMARY nvarchar(100)                          = '' output,
+  @ACTUALDATE as datetime                         = null output,
+  @EXPECTEDDATE as datetime                       = null output,
   @OWNER uniqueidentifier                         = null output,
   @INTERACTIONTYPECODEID uniqueidentifier         = null output,
   @INTERACTIONCATEGORYID uniqueidentifier         = null output,
@@ -45,6 +47,8 @@ as
       intr
     set  
       intr.OBJECTIVE = case when @SUMMARY = '' or @SUMMARY is null then intr.OBJECTIVE else @SUMMARY end,
+      intr.ACTUALDATE = case when @ACTUALDATE is null then intr.ACTUALDATE else @ACTUALDATE end,
+      intr.EXPECTEDDATE = case when @EXPECTEDDATE is null then intr.EXPECTEDDATE else @EXPECTEDDATE end,
       intr.FUNDRAISERID = case when @OWNER is null then intr.FUNDRAISERID else @OWNER end,
       intr.INTERACTIONTYPECODEID = case when @INTERACTIONTYPECODEID is null then intr.INTERACTIONTYPECODEID else @INTERACTIONTYPECODEID end,
       intr.INTERACTIONSUBCATEGORYID = case when @INTERACTIONSUBCATEGORYID is null then intr.INTERACTIONSUBCATEGORYID else @INTERACTIONSUBCATEGORYID end,
@@ -70,6 +74,9 @@ as
       <Exception SearchText="UFN_IDSETREADER_GETRESULTS_GUID" CustomErrorMsgResourceKey="$$an_invalid_selection_was_specified_for_this_global_change">
         <CustomErrorMsg>An invalid selection was specified for this global change.</CustomErrorMsg>
       </Exception>
+      <Exception SearchText="CK_INTERACTION_ACTUALDATEPRESENTONLYWHENCOMPLETE">
+        <CustomErrorMsg>Some interactions in the provided selection are not Completed, but Actual date can only be set for Completed interactions. Please update the selection before trying again.</CustomErrorMsg>
+      </Exception>
     </CustomExceptions>
   </ExpectedDBExceptions>
 
@@ -85,6 +92,8 @@ as
         </FormField>
         <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
         <FormField FieldID="SUMMARY" MaxLength="100" Caption="Summary" DefaultValueText="" CaptionResourceKey="$$summary" />
+        <FormField FieldID="ACTUALDATE" DataType="Date" Caption="Actual date" />
+        <FormField FieldID="EXPECTEDDATE" DataType="Date" Caption="Expected date" />
         <FormField FieldID="OWNER" DataType="Guid" Caption="Owner">
           <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true">
             <FormFieldOverrides>
