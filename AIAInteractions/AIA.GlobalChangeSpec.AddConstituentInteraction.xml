@@ -1,0 +1,272 @@
+﻿<GlobalChangeSpec 
+    xmlns="bb_appfx_globalchange"
+    xmlns:c="bb_appfx_commontypes"
+    ID="6549f3f4-96d8-4f61-9783-a497c7665b90"
+    Name="Add constituent interaction (AIA)"
+    Description="Adds an interaction to a constituent record"
+    Author="Danny Smith (AIA)"
+    DisplayName="Add constituent interaction (AIA)"
+    GlobalChangeFolder="Constituent"
+    SPName="USR_AIA_USP_GLOBALCHANGE_ADDCONSTITUENTINTERACTION"
+    >
+
+  <CreateProcedureSQL>
+    
+      create procedure dbo.USR_AIA_USP_GLOBALCHANGE_ADDCONSTITUENTINTERACTION
+      (
+        @IDSETREGISTERID uniqueidentifier = null,
+        @EXPECTEDDATE datetime = null,
+        @EXPECTEDDATERELATIVE bit = null,
+        @EXPECTEDDATEDAYS int = null,
+        @ACTUALDATE datetime = null,
+        @ACTUALDATERELATIVE bit = null,
+        @ACTUALDATEDAYS int = null,
+        @FUNDRAISERID uniqueidentifier = null,
+        @INTERACTIONTYPECODEID uniqueidentifier,
+        @OBJECTIVE nvarchar(100) = '',
+        @STATUSCODE tinyint = 0,
+        @COMMENT nvarchar(max) = '',
+        @EVENTID uniqueidentifier = null, 
+        @PARTICIPANTS xml = null,
+        @INTERACTIONCATEGORYID uniqueidentifier = null,
+        @INTERACTIONSUBCATEGORYID uniqueidentifier = null,
+        @SITES xml = null,
+        @CHANGEAGENTID uniqueidentifier = null,
+        @ASOF as datetime = null,
+        @NUMBERADDED int = 0 output,
+        @NUMBEREDITED int = 0 output,
+        @NUMBERDELETED int = 0 output,
+        @CURRENTAPPUSERID uniqueidentifier = null
+      )
+      as      
+        set nocount off;
+        
+        set @NUMBERADDED = 0;
+        set @NUMBEREDITED = 0;
+        set @NUMBERDELETED = 0; 
+        
+        if @IDSETREGISTERID is null begin
+          raiserror ('IDSETREGISTERID is required',13,1);
+        end
+
+        if @EXPECTEDDATERELATIVE = 1
+          set @EXPECTEDDATE = cast(DATEADD(day, @EXPECTEDDATEDAYS, GETDATE()) as date);
+        
+        if @ACTUALDATERELATIVE = 1
+          set @ACTUALDATE = cast(DATEADD(day, @ACTUALDATEDAYS, GETDATE()) as date);
+        
+        if @CHANGEAGENTID is null  
+          exec dbo.USP_CHANGEAGENT_GETORCREATECHANGEAGENT @CHANGEAGENTID output;
+        
+        declare @BPID uniqueidentifier = '3269A1D1-31CB-4D28-945C-B7623A3EFCCA';
+        
+        if @SITES is not null begin
+          set @SITES = (SELECT 
+                    ID, 
+                    SITEID
+                  FROM 
+                    dbo.UFN_CONSTITUENTINTERACTION_GETSITES_FROMITEMLISTXML(@SITES)
+                  where
+                    dbo.UFN_SECURITY_APPUSER_GRANTED_BUSINESSPROCESS_FORSITE(@CURRENTAPPUSERID, @BPID, SITEID) = 1
+                    or dbo.UFN_APPUSER_ISSYSADMIN(@CURRENTAPPUSERID) = 1
+                    for xml raw('ITEM'),type,elements,root('SITES'),BINARY BASE64);
+        end        
+        
+        declare @BYPASSSECURITY bit;
+        declare @BYPASSSITESECURITY bit;
+        
+        exec dbo.USP_SECURITY_APPUSER_BYPASSSECURITYFORBUSINESSPROCESS @CURRENTAPPUSERID, @BPID, @BYPASSSECURITY output, @BYPASSSITESECURITY output;                
+        
+        declare @IDSETRECORDS table (CONSTITUENTID uniqueidentifier, INTERACTIONID uniqueidentifier);
+        
+        insert into @IDSETRECORDS(CONSTITUENTID, INTERACTIONID)
+          select 
+            ID, 
+            newID() 
+          from 
+            dbo.UFN_CONSTITUENT_GETRECORDSINSELECTION_FORBUSINESSPROCESS(@CURRENTAPPUSERID, @IDSETREGISTERID, @BPID, @BYPASSSECURITY, @BYPASSSITESECURITY)
+      
+        insert into dbo.INTERACTION (
+          ID,
+          ADDEDBYID,
+          CHANGEDBYID,
+          CONSTITUENTID,
+          EXPECTEDDATE,
+          ACTUALDATE,
+          FUNDRAISERID,
+          INTERACTIONTYPECODEID,
+          OBJECTIVE,
+          STATUSCODE,
+          COMMENT,
+          EVENTID,
+          INTERACTIONSUBCATEGORYID) 
+        select
+          IDSETRECORDS.INTERACTIONID,
+          @CHANGEAGENTID,
+          @CHANGEAGENTID,
+          IDSETRECORDS.CONSTITUENTID,
+          @EXPECTEDDATE,
+          @ACTUALDATE,
+          @FUNDRAISERID,
+          @INTERACTIONTYPECODEID,
+          @OBJECTIVE,
+          @STATUSCODE,
+          @COMMENT,
+          @EVENTID,
+          @INTERACTIONSUBCATEGORYID
+        from
+          @IDSETRECORDS as IDSETRECORDS
+        
+        set @NUMBERADDED = @@ROWCOUNT;
+        
+        declare IDSETCURSOR cursor local fast_forward for
+          select
+            INTERACTIONID
+          from
+            @IDSETRECORDS
+        
+        declare @INTERACTIONID uniqueidentifier;
+        declare @CURRENTDATE datetime;
+        
+        set @CURRENTDATE = getdate();
+          
+        open IDSETCURSOR;
+              
+        fetch next from IDSETCURSOR into @INTERACTIONID;
+            
+        while (@@FETCH_STATUS = 0)
+        begin          
+          exec dbo.USP_CONSTITUENTINTERACTION_GETSITES_ADDFROMXML @INTERACTIONID, @SITES, @CHANGEAGENTID, @CURRENTDATE;                      
+          exec dbo.USP_INTERACTION_PARTICIPANTS_ADDFROMXML @INTERACTIONID, @PARTICIPANTS, @CHANGEAGENTID;
+          
+          fetch next from IDSETCURSOR into @INTERACTIONID;
+        end
+        
+        close IDSETCURSOR;        
+        deallocate IDSETCURSOR;
+        return 0;
+    
+  </CreateProcedureSQL>
+
+  <ExpectedDBExceptions>
+    <CustomExceptions xmlns="bb_appfx_commontypes">
+      <Exception SearchText="UFN_IDSETREADER_GETRESULTS_GUID" CustomErrorMsgResourceKey="$$an_invalid_selection_was_specified_for_this_global_change">
+        <CustomErrorMsg>An invalid selection was specified for this global change.</CustomErrorMsg>
+      </Exception>
+    </CustomExceptions>
+  </ExpectedDBExceptions>
+
+  <ParametersFormMetaData>
+    <FormMetaData xmlns="bb_appfx_commontypes">
+      <FormFields>
+        <FormField FieldID="IDSETREGISTERID" DataType="Guid" Required="true" Caption="Selection" CaptionResourceKey="$$selection">
+          <SearchList SearchListID="98d0070e-c4a7-495b-a438-2ac12da79068" EnableQuickFind="true">
+            <FormFieldOverrides>
+              <FormFieldOverride FieldID="RECORDTYPEID" Caption="Record type" ReadOnly="true" DefaultValueText="Fields!RECORDTYPEID" />
+            </FormFieldOverrides>
+          </SearchList>
+        </FormField>
+        <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
+        <FormField FieldID="INTERACTIONTYPECODEID" DataType="Guid" Required="true" Caption="Contact method" CaptionResourceKey="$$contact_method">
+          <CodeTable CodeTableName="INTERACTIONTYPECODE" />
+        </FormField>
+        <FormField FieldID="OBJECTIVE" Required="true" MaxLength="100" Caption="Summary" CaptionResourceKey="$$summary" />
+        <FormField FieldID="FUNDRAISERID" DataType="Guid" Caption="Owner" CaptionResourceKey="$$owner">
+          <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true">
+            <FormFieldOverrides>
+              <FormFieldOverride FieldID="INCLUDEORGANIZATIONS" Caption="Organizations" ReadOnly="true" DefaultValueText="False" />
+              <FormFieldOverride FieldID="EXCLUDEHOUSEHOLDS" Caption="EXCLUDEHOUSEHOLDS" Hidden="true" DefaultValueText="True" />
+            </FormFieldOverrides>
+          </SearchList>
+        </FormField>
+        <FormField FieldID="EXPECTEDDATE" DataType="Date" Caption="Expected date" CaptionResourceKey="$$expected_date" />
+        <FormField FieldID="EXPECTEDDATERELATIVE" DataType="Boolean" Caption="Relative date" />
+        <FormField FieldID="EXPECTEDDATEDAYS" DataType="Integer" Caption="Days from today" />
+        <FormField FieldID="ACTUALDATE" DataType="Date" Caption="Actual date" CaptionResourceKey="$$actual_date" />
+        <FormField FieldID="ACTUALDATERELATIVE" DataType="Boolean" Caption="Relative date" />
+        <FormField FieldID="ACTUALDATEDAYS" DataType="Integer" Caption="Days from today" />
+        <FormField FieldID="STATUSCODE" DataType="TinyInt" Required="true" Caption="Status" CaptionResourceKey="$$status">
+          <ValueList>
+            <Items>
+              <Item LabelResourceKey="$$pending">
+                <Value>1</Value>
+                <Label>Pending</Label>
+              </Item>
+              <Item LabelResourceKey="$$completed">
+                <Value>2</Value>
+                <Label>Completed</Label>
+              </Item>
+            </Items>
+          </ValueList>
+        </FormField>
+        <FormField FieldID="COMMENT" Caption="Comment" CaptionResourceKey="$$comment" />
+        <FormField FieldID="EVENTID" DataType="Guid" Caption="Event" CaptionResourceKey="$$event">
+          <SearchList SearchListID="21452a39-7c7d-4334-8b89-6c0ea619acec" EnableQuickFind="true" />
+        </FormField>
+        <FormField FieldID="PARTICIPANTS" DataType="XML" Caption="Participants" CaptionResourceKey="$$participants">
+          <Collection>
+            <Fields>
+              <FormField FieldID="ID" DataType="Guid" Hidden="true" Caption="ID" CaptionResourceKey="$$id" />
+              <FormField FieldID="CONSTITUENTID" DataType="Guid" Caption="Participant" CaptionResourceKey="$$participant">
+                <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true" />
+              </FormField>
+            </Fields>
+          </Collection>
+        </FormField>
+        <FormField FieldID="INTERACTIONCATEGORYID" DataType="Guid" Caption="Category" CaptionResourceKey="$$category">
+          <SimpleDataList SimpleDataListID="cbba7545-b66f-44ac-aa24-d9c2f8cbc4ec" />
+        </FormField>
+        <FormField FieldID="INTERACTIONSUBCATEGORYID" DataType="Guid" Caption="Subcategory" CaptionResourceKey="$$subcategory">
+          <SimpleDataList SimpleDataListID="0eacc39b-07d1-4641-8774-e319559535a7">
+            <Params>
+              <Param ID="INTERACTIONCATEGORYID">
+                <Value>Fields!INTERACTIONCATEGORYID</Value>
+              </Param>
+            </Params>
+          </SimpleDataList>
+        </FormField>
+        <FormField FieldID="SITES" DataType="XML" Caption="Interaction sites" CaptionResourceKey="$$interaction_sites">
+          <Collection>
+            <Fields>
+              <FormField FieldID="ID" DataType="Guid" Hidden="true" />
+              <FormField FieldID="SITEID" DataType="Guid" Required="true" Caption="Site" CaptionResourceKey="$$site">
+                <SimpleDataList SimpleDataListID="c8e8d3ba-2725-421f-a796-e2fcc1202780">
+                  <SearchList SearchListID="27a63ede-a0d4-4074-a85a-196df4adc0dd" />
+                </SimpleDataList>
+              </FormField>
+            </Fields>
+          </Collection>
+          <InstalledProductList>
+            <InstalledProduct ID="133f9bca-00f1-4007-9792-586b931340c6" />
+          </InstalledProductList>
+        </FormField>
+      </FormFields>
+
+      <WebUIComponent>
+        <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIAAddConstituentInteractionUIModel" />
+        <WebUI>
+          <ExternalResource Url="browser/htmlforms/custom/AIA/AIAAddConstituentInteraction.html" />
+        </WebUI>
+      </WebUIComponent>
+
+      <FieldGroups>
+        <FieldGroup ID="COMMENTFIELDGROUP" Caption="Comment" CaptionResourceKey="$$comment">
+          <Fields>
+            <Field>COMMENT</Field>
+          </Fields>
+        </FieldGroup>
+        <FieldGroup ID="PARTICIPANTSFIELDGROUP" Caption="Participants" CaptionResourceKey="$$participants">
+          <Fields>
+            <Field>PARTICIPANTS</Field>
+          </Fields>
+        </FieldGroup>
+      </FieldGroups>
+      <UIActions>
+        <UIAction ActionID="QUERYEDIT">
+          <ShowEditQueryForm LinkedFieldId="IDSETREGISTERID" />
+        </UIAction>
+      </UIActions>
+    </FormMetaData>
+  </ParametersFormMetaData>
+ 
+</GlobalChangeSpec>

@@ -46,6 +46,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Program Files\Blackbaud\bbappfx\vroot\bin\Blackbaud.AppFx.Constituent.UIModel.dll</HintPath>
     </Reference>
+    <Reference Include="Blackbaud.AppFx.Products, Version=4.0.2616.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files\Blackbaud\bbappfx\vroot\bin\Blackbaud.AppFx.Products.dll</HintPath>
+    </Reference>
     <Reference Include="Blackbaud.AppFx.Server, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -73,6 +77,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AIAAddConstituentInteractionPARTICIPANTSUIModel.CodeGen.cs">
+      <DependentUpon>AIAAddConstituentInteractionUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIAAddConstituentInteractionSITESUIModel.CodeGen.cs">
+      <DependentUpon>AIAAddConstituentInteractionUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIAAddConstituentInteractionUIModel.CodeGen.cs">
+      <DependentUpon>AIAAddConstituentInteractionUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIAAddConstituentInteractionUIModel.cs" />
     <Compile Include="AIAAddInteractionAttributeATTRIBUTECATEGORIESUIModel.CodeGen.cs">
       <DependentUpon>AIAAddInteractionAttributeUIModel.cs</DependentUpon>
     </Compile>
@@ -107,6 +121,13 @@
       <Link>LinkedSpecs\AIA.GlobalChangeSpec.UpdateInteraction.xml</Link>
       <SubType>Designer</SubType>
     </None>
+    <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.AddConstituentInteraction.xml">
+      <Link>LinkedSpecs\AIA.GlobalChangeSpec.AddConstituentInteraction.xml</Link>
+    </None>
+    <Content Include="AIAAddConstituentInteractionUIModel.xml">
+      <DependentUpon>AIAAddConstituentInteractionUIModel.cs</DependentUpon>
+    </Content>
+    <Content Include="htmlforms\custom\AIA\AIAAddConstituentInteraction.html" />
     <Content Include="htmlforms\custom\AIA\AIAUpdateInteractionMetadata.html" />
     <None Include="..\AIAInteractions\AIA.SmartFieldSpec.InteractionDates.xml">
       <Link>LinkedSpecs\AIA.SmartFieldSpec.InteractionDates.xml</Link>

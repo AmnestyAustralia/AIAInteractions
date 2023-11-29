@@ -8,6 +8,7 @@
     >
 
   <c:DependencyList>
+    <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.AddConstituentInteraction.xml" />
     <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.AddInteractionAttribute.xml" />
     <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml" />
     <c:Dependency CatalogAssembly="AIAInteractions.dll" CatalogItem="AIAInteractions.AIA.SmartFieldSpec.InteractionDates.xml" />

@@ -1,0 +1,10 @@
+﻿<UIModelWizardMetadata>
+  <SpecFileName>AIA.GlobalChangeSpec.AddConstituentInteraction.xml</SpecFileName>
+  <Namespace></Namespace>
+  <ClassName>AIAAddConstituentInteractionUIModel</ClassName>
+  <HtmlInfo GenerateHtml="true">
+    <HtmlFile>AIAAddConstituentInteraction.html</HtmlFile>
+    <HtmlFolder>htmlforms\custom\AIA\</HtmlFolder>
+  </HtmlInfo>
+  <GenerateFromDatabase>true</GenerateFromDatabase>
+</UIModelWizardMetadata>

@@ -63,7 +63,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="AIA.SmartFieldSpec.InteractionDates.xml" />
+    <EmbeddedResource Include="AIA.SmartFieldSpec.InteractionDates.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AIA.GlobalChangeSpec.DeleteInteractionAttribute.xml">
@@ -77,6 +79,9 @@
     <EmbeddedResource Include="AIA.GlobalChangeSpec.UpdateInteractionMetadata.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AIA.GlobalChangeSpec.AddConstituentInteraction.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
