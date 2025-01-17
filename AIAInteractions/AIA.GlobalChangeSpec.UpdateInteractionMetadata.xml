@@ -22,8 +22,13 @@ create procedure dbo.USR_AIA_USP_GLOBALCHANGE_UPDATEINTERACTION
   @NUMBEREDITED int                               = 0 output,
   @NUMBERDELETED int                              = 0 output,
   @SUMMARY nvarchar(100)                          = '' output,
-  @ACTUALDATE as datetime                         = null output,
-  @EXPECTEDDATE as datetime                       = null output,
+  @STATUSCODE tinyint                             = 0 output,
+  @EXPECTEDDATE datetime                          = null output,
+  @EXPECTEDDATERELATIVE bit                       = null output,
+  @EXPECTEDDATEDAYS int                           = null output,
+  @ACTUALDATE datetime                            = null output,
+  @ACTUALDATERELATIVE bit                         = null output,
+  @ACTUALDATEDAYS int                             = null output,
   @OWNER uniqueidentifier                         = null output,
   @INTERACTIONTYPECODEID uniqueidentifier         = null output,
   @INTERACTIONCATEGORYID uniqueidentifier         = null output,
@@ -41,11 +46,18 @@ as
 
   if @CHANGEAGENTID is null
     exec dbo.USP_CHANGEAGENT_GETORCREATECHANGEAGENT @CHANGEAGENTID output;
-  
+
+  if @EXPECTEDDATERELATIVE = 1
+    set @EXPECTEDDATE = cast(DATEADD(day, @EXPECTEDDATEDAYS, GETDATE()) as date);
+
+  if @ACTUALDATERELATIVE = 1
+    set @ACTUALDATE = cast(DATEADD(day, @ACTUALDATEDAYS, GETDATE()) as date);
+
   begin try
     update 
       intr
     set  
+      intr.STATUSCODE = case when @STATUSCODE is null then intr.STATUSCODE else @STATUSCODE end,
       intr.OBJECTIVE = case when @SUMMARY = '' or @SUMMARY is null then intr.OBJECTIVE else @SUMMARY end,
       intr.ACTUALDATE = case when @ACTUALDATE is null then intr.ACTUALDATE else @ACTUALDATE end,
       intr.EXPECTEDDATE = case when @EXPECTEDDATE is null then intr.EXPECTEDDATE else @EXPECTEDDATE end,
@@ -91,9 +103,35 @@ as
           </SearchList>
         </FormField>
         <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
+        <FormField FieldID="STATUSCODE" DataType="TinyInt" Caption="Status">
+          <ValueList>
+            <Items>
+              <Item LabelResourceKey="$$pending">
+                <Value>1</Value>
+                <Label>Pending</Label>
+              </Item>
+              <Item LabelResourceKey="$$completed">
+                <Value>2</Value>
+                <Label>Completed</Label>
+              </Item>
+              <Item LabelResourceKey="$$canceled">
+                <Value>4</Value>
+                <Label>Canceled</Label>
+              </Item>
+              <Item LabelResourceKey="$$declined">
+                <Value>5</Value>
+                <Label>Declined</Label>
+              </Item>
+            </Items>
+          </ValueList>
+        </FormField>
         <FormField FieldID="SUMMARY" MaxLength="100" Caption="Summary" DefaultValueText="" CaptionResourceKey="$$summary" />
-        <FormField FieldID="ACTUALDATE" DataType="Date" Caption="Actual date" />
-        <FormField FieldID="EXPECTEDDATE" DataType="Date" Caption="Expected date" />
+        <FormField FieldID="EXPECTEDDATE" DataType="Date" Caption="Expected date" CaptionResourceKey="$$expected_date" />
+        <FormField FieldID="EXPECTEDDATERELATIVE" DataType="Boolean" Caption="Relative date" />
+        <FormField FieldID="EXPECTEDDATEDAYS" DataType="Integer" Caption="Days from today" />
+        <FormField FieldID="ACTUALDATE" DataType="Date" Caption="Actual date" CaptionResourceKey="$$actual_date" />
+        <FormField FieldID="ACTUALDATERELATIVE" DataType="Boolean" Caption="Relative date" />
+        <FormField FieldID="ACTUALDATEDAYS" DataType="Integer" Caption="Days from today" />
         <FormField FieldID="OWNER" DataType="Guid" Caption="Owner">
           <SearchList SearchListID="23c5c603-d7d8-4106-aecc-65392b563887" EnableQuickFind="true">
             <FormFieldOverrides>

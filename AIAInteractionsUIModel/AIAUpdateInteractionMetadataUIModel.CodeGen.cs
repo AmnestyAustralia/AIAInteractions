@@ -17,6 +17,23 @@ namespace AIAInteractionsUIModel
 public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.AppFx.UIModeling.Core.CustomUIModel
 {
 
+#region "Enums"
+
+    /// <summary>
+    /// Enumerated values for use with the STATUSCODE property
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+    public enum STATUSCODES : int
+    {
+        @Pending = 1,
+        @Completed = 2,
+        @Canceled = 4,
+        @Declined = 5
+    }
+
+#endregion
+
+
 #region "Extensibility methods"
 
 	partial void OnCreated();
@@ -25,9 +42,14 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
 
     private global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid> _idsetregisterid;
     private global::Blackbaud.AppFx.UIModeling.Core.GuidField _recordtypeid;
+    private global::Blackbaud.AppFx.UIModeling.Core.ValueListField<STATUSCODES?> _statuscode;
     private global::Blackbaud.AppFx.UIModeling.Core.StringField _objective;
-    private global::Blackbaud.AppFx.UIModeling.Core.DateField _actualdate;
     private global::Blackbaud.AppFx.UIModeling.Core.DateField _expecteddate;
+    private global::Blackbaud.AppFx.UIModeling.Core.BooleanField _expecteddaterelative;
+    private global::Blackbaud.AppFx.UIModeling.Core.IntegerField _expecteddatedays;
+    private global::Blackbaud.AppFx.UIModeling.Core.DateField _actualdate;
+    private global::Blackbaud.AppFx.UIModeling.Core.BooleanField _actualdaterelative;
+    private global::Blackbaud.AppFx.UIModeling.Core.IntegerField _actualdatedays;
     private global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid> _owner;
     private global::Blackbaud.AppFx.UIModeling.Core.CodeTableField _interactiontypecodeid;
     private global::Blackbaud.AppFx.UIModeling.Core.SimpleDataListField<System.Guid> _interactioncategoryid;
@@ -42,9 +64,14 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
 
         _idsetregisterid = new global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid>();
         _recordtypeid = new global::Blackbaud.AppFx.UIModeling.Core.GuidField();
+        _statuscode = new global::Blackbaud.AppFx.UIModeling.Core.ValueListField<STATUSCODES?>();
         _objective = new global::Blackbaud.AppFx.UIModeling.Core.StringField();
-        _actualdate = new global::Blackbaud.AppFx.UIModeling.Core.DateField();
         _expecteddate = new global::Blackbaud.AppFx.UIModeling.Core.DateField();
+        _expecteddaterelative = new global::Blackbaud.AppFx.UIModeling.Core.BooleanField();
+        _expecteddatedays = new global::Blackbaud.AppFx.UIModeling.Core.IntegerField();
+        _actualdate = new global::Blackbaud.AppFx.UIModeling.Core.DateField();
+        _actualdaterelative = new global::Blackbaud.AppFx.UIModeling.Core.BooleanField();
+        _actualdatedays = new global::Blackbaud.AppFx.UIModeling.Core.IntegerField();
         _owner = new global::Blackbaud.AppFx.UIModeling.Core.SearchListField<System.Guid>();
         _interactiontypecodeid = new global::Blackbaud.AppFx.UIModeling.Core.CodeTableField();
         _interactioncategoryid = new global::Blackbaud.AppFx.UIModeling.Core.SimpleDataListField<System.Guid>();
@@ -74,6 +101,16 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
         _recordtypeid.DBReadOnly = true;
         this.Fields.Add(_recordtypeid);
         //
+        //_statuscode
+        //
+        _statuscode.Name = "STATUSCODE";
+        _statuscode.Caption = "Status";
+        _statuscode.DataSource.Add(new global::Blackbaud.AppFx.UIModeling.Core.ValueListItem<STATUSCODES?> {Value = STATUSCODES.@Pending, Translation = "Pending"});
+        _statuscode.DataSource.Add(new global::Blackbaud.AppFx.UIModeling.Core.ValueListItem<STATUSCODES?> {Value = STATUSCODES.@Completed, Translation = "Completed"});
+        _statuscode.DataSource.Add(new global::Blackbaud.AppFx.UIModeling.Core.ValueListItem<STATUSCODES?> {Value = STATUSCODES.@Canceled, Translation = "Canceled"});
+        _statuscode.DataSource.Add(new global::Blackbaud.AppFx.UIModeling.Core.ValueListItem<STATUSCODES?> {Value = STATUSCODES.@Declined, Translation = "Declined"});
+        this.Fields.Add(_statuscode);
+        //
         //_objective
         //
         _objective.Name = "SUMMARY";
@@ -81,17 +118,41 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
         _objective.MaxLength = 100;
         this.Fields.Add(_objective);
         //
+        //_expecteddate
+        //
+        _expecteddate.Name = "EXPECTEDDATE";
+        _expecteddate.Caption = "Expected date";
+        this.Fields.Add(_expecteddate);
+        //
+        //_expecteddaterelative
+        //
+        _expecteddaterelative.Name = "EXPECTEDDATERELATIVE";
+        _expecteddaterelative.Caption = "Relative date";
+        this.Fields.Add(_expecteddaterelative);
+        //
+        //_expecteddatedays
+        //
+        _expecteddatedays.Name = "EXPECTEDDATEDAYS";
+        _expecteddatedays.Caption = "Days from today";
+        this.Fields.Add(_expecteddatedays);
+        //
         //_actualdate
         //
         _actualdate.Name = "ACTUALDATE";
         _actualdate.Caption = "Actual date";
         this.Fields.Add(_actualdate);
         //
-        //_expecteddate
+        //_actualdaterelative
         //
-        _expecteddate.Name = "EXPECTEDDATE";
-        _expecteddate.Caption = "Expected date";
-        this.Fields.Add(_expecteddate);
+        _actualdaterelative.Name = "ACTUALDATERELATIVE";
+        _actualdaterelative.Caption = "Relative date";
+        this.Fields.Add(_actualdaterelative);
+        //
+        //_actualdatedays
+        //
+        _actualdatedays.Name = "ACTUALDATEDAYS";
+        _actualdatedays.Caption = "Days from today";
+        this.Fields.Add(_actualdatedays);
         //
         //_owner
         //
@@ -160,12 +221,48 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
 	}
 
     /// <summary>
+    /// Status
+    /// </summary>
+    [System.ComponentModel.Description("Status")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.ValueListField<STATUSCODES?> @STATUSCODE {
+		get { return _statuscode; }
+	}
+
+    /// <summary>
     /// Summary
     /// </summary>
     [System.ComponentModel.Description("Summary")]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
 	public global::Blackbaud.AppFx.UIModeling.Core.StringField @SUMMARY {
 		get { return _objective; }
+	}
+
+    /// <summary>
+    /// Expected date
+    /// </summary>
+    [System.ComponentModel.Description("Expected date")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.DateField @EXPECTEDDATE {
+		get { return _expecteddate; }
+	}
+
+    /// <summary>
+    /// Relative date
+    /// </summary>
+    [System.ComponentModel.Description("Relative date")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.BooleanField @EXPECTEDDATERELATIVE {
+		get { return _expecteddaterelative; }
+	}
+
+    /// <summary>
+    /// Days from today
+    /// </summary>
+    [System.ComponentModel.Description("Days from today")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.IntegerField @EXPECTEDDATEDAYS {
+		get { return _expecteddatedays; }
 	}
 
     /// <summary>
@@ -178,12 +275,21 @@ public partial class @AIAUpdateInteractionMetadataUIModel : global::Blackbaud.Ap
 	}
 
     /// <summary>
-    /// Expected date
+    /// Relative date
     /// </summary>
-    [System.ComponentModel.Description("Expected date")]
+    [System.ComponentModel.Description("Relative date")]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
-	public global::Blackbaud.AppFx.UIModeling.Core.DateField @EXPECTEDDATE {
-		get { return _expecteddate; }
+	public global::Blackbaud.AppFx.UIModeling.Core.BooleanField @ACTUALDATERELATIVE {
+		get { return _actualdaterelative; }
+	}
+
+    /// <summary>
+    /// Days from today
+    /// </summary>
+    [System.ComponentModel.Description("Days from today")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("BBUIModelLibrary", "4.0.2616.0")]
+	public global::Blackbaud.AppFx.UIModeling.Core.IntegerField @ACTUALDATEDAYS {
+		get { return _actualdatedays; }
 	}
 
     /// <summary>
