@@ -57,7 +57,7 @@ as
     update 
       intr
     set  
-      intr.STATUSCODE = case when @STATUSCODE is null then intr.STATUSCODE else @STATUSCODE end,
+      intr.STATUSCODE = case when @STATUSCODE = 0 or @STATUSCODE is null then intr.STATUSCODE else @STATUSCODE end,
       intr.OBJECTIVE = case when @SUMMARY = '' or @SUMMARY is null then intr.OBJECTIVE else @SUMMARY end,
       intr.ACTUALDATE = case when @ACTUALDATE is null then intr.ACTUALDATE else @ACTUALDATE end,
       intr.EXPECTEDDATE = case when @EXPECTEDDATE is null then intr.EXPECTEDDATE else @EXPECTEDDATE end,
