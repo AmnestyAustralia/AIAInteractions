@@ -101,6 +101,10 @@
       <DependentUpon>AIADeleteInteractionAttributeUIModel.cs</DependentUpon>
     </Compile>
     <Compile Include="AIADeleteInteractionAttributeUIModel.cs" />
+    <Compile Include="AIAInteractionAppealsUIModel.CodeGen.cs">
+      <DependentUpon>AIAInteractionAppealsUIModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AIAInteractionAppealsUIModel.cs" />
     <Compile Include="AIAInteractionDatesUIModel.CodeGen.cs">
       <DependentUpon>AIAInteractionDatesUIModel.cs</DependentUpon>
     </Compile>
@@ -124,9 +128,16 @@
     <None Include="..\AIAInteractions\AIA.GlobalChangeSpec.AddConstituentInteraction.xml">
       <Link>LinkedSpecs\AIA.GlobalChangeSpec.AddConstituentInteraction.xml</Link>
     </None>
+    <None Include="..\AIAInteractions\AIA.SmartFieldSpec.InteractionAppeals.xml">
+      <Link>LinkedSpecs\AIA.SmartFieldSpec.InteractionAppeals.xml</Link>
+    </None>
     <Content Include="AIAAddConstituentInteractionUIModel.xml">
       <DependentUpon>AIAAddConstituentInteractionUIModel.cs</DependentUpon>
     </Content>
+    <Content Include="AIAInteractionAppealsUIModel.xml">
+      <DependentUpon>AIAInteractionAppealsUIModel.cs</DependentUpon>
+    </Content>
+    <Content Include="htmlforms\custom\AIA\AIAInteractionAppeals.html" />
     <Content Include="htmlforms\custom\AIA\AIAAddConstituentInteraction.html" />
     <Content Include="htmlforms\custom\AIA\AIAUpdateInteractionMetadata.html" />
     <None Include="..\AIAInteractions\AIA.SmartFieldSpec.InteractionDates.xml">

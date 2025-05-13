@@ -1,21 +1,22 @@
-﻿<SmartFieldSpec
+<SmartFieldSpec 
   xmlns="bb_appfx_smartfield"
   xmlns:c="bb_appfx_commontypes"
-  ID="21e0e4db-2ded-4bf0-a289-605879793fef"
-  Name="Interaction dates (AIA)"
-  Description="Returns the earliest or latest interaction date meeting the provided criteria."
+  ID="75d9a862-712f-4cc3-bbe2-048e73d592d6"
+  Name="Interaction appeals (AIA)"
+  Description="Returns the earliest or latest appeal for interactions meeting the provided criteria."
   Author="Danny Smith (AIA)"
-  SPName="USR_AIA_USP_SMARTFIELD_INTERACTIONDATES"
-  DataType="Date"
+  SPName="USR_AIA_USP_SMARTFIELD_INTERACTIONAPPEALS"
+  DataType="Record"
+  ValueRecordType="Appeal"
   RecordType="Constituent"
-  DisplayName="Interaction dates (AIA)"
+  DisplayName="Interaction appeals (AIA)"
   SmartFieldFolder="Constituent\Interaction"
 >
 
   <!-- describe the SP used to calculate the smart field values -->
   <CreateProcedureSQL>
     <![CDATA[
-create procedure dbo.USR_AIA_USP_SMARTFIELD_INTERACTIONDATES
+create procedure dbo.USR_AIA_USP_SMARTFIELD_INTERACTIONAPPEALS
 (
   @IDSETREGISTERID uniqueidentifier,
   @STATUSCODE int,
@@ -25,6 +26,7 @@ create procedure dbo.USR_AIA_USP_SMARTFIELD_INTERACTIONDATES
   @ACTUALENDDATE date,
   @PLANNEDSTARTDATE date,
   @PLANNEDENDDATE date,
+  @INCLUDEBLANKS bit,
   @OWNER uniqueidentifier,
   @INTERACTIONTYPECODEID uniqueidentifier,
   @INTERACTIONCATEGORYID uniqueidentifier,
@@ -36,42 +38,53 @@ as
   if @ASOF is null 
     set @ASOF = getdate()
  
-  declare @idsql as nvarchar(100) = ' and (ID in (select ID from [UFN_IDSETREADER_GETRESULTS_GUID](@IDSETREGISTERID)))';
+  declare @idsql as nvarchar(100) = ' and (INTR.ID in (select ID from [UFN_IDSETREADER_GETRESULTS_GUID](@IDSETREGISTERID)))';
 
   if(@IDSETREGISTERID is null)
     set @idsql = '';
+
+  declare @blanksql as nvarchar(100) = ' and APPEALID is not null';
+  
+  if (@INCLUDEBLANKS = 1)
+    set @blanksql = '';
 
   declare @sql as nvarchar(max);
  
   set @sql = '';
   set @sql = @sql + char(10) + '
-    select CONS.ID, ' + @DATETYPE + '(' + @DATEFIELD + ') as VALUE
-    from
-      (
-        select *
-        from dbo.INTERACTION
-        where   
-          ( 
-            (@ACTUALSTARTDATE is null and @ACTUALENDDATE is null) 
-            or (@ACTUALSTARTDATE is not null and @ACTUALENDDATE is null and ACTUALDATE >= @ACTUALSTARTDATE) 
-            or (@ACTUALENDDATE is not null and @ACTUALSTARTDATE is null and ACTUALDATE <= @ACTUALENDDATE)
-            or (@ACTUALSTARTDATE is not null and @ACTUALENDDATE is not null and ACTUALDATE >= @ACTUALSTARTDATE and ACTUALDATE <= @ACTUALENDDATE)
-          )
-          and (@INTERACTIONSUBCATEGORYID is null or (INTERACTIONSUBCATEGORYID=@INTERACTIONSUBCATEGORYID))
-          and (@INTERACTIONCATEGORYID  is null or (INTERACTIONSUBCATEGORYID in (select ID from INTERACTIONSUBCATEGORY where INTERACTIONCATEGORYID = @INTERACTIONCATEGORYID)))
-          and (
-            (@PLANNEDSTARTDATE is null and @PLANNEDENDDATE is null)
-            or (@PLANNEDSTARTDATE is not null and @PLANNEDENDDATE is null and EXPECTEDDATE >= @PLANNEDSTARTDATE) 
-            or (@PLANNEDSTARTDATE is null and @PLANNEDENDDATE is not null and EXPECTEDDATE <= @PLANNEDENDDATE)
-            or (@PLANNEDSTARTDATE is not null and @PLANNEDENDDATE is not null and EXPECTEDDATE >= @PLANNEDSTARTDATE and EXPECTEDDATE <= @PLANNEDENDDATE)
-          )
-          and (@OWNER is null or (FUNDRAISERID = @OWNER))
-          and (@STATUSCODE is null or (STATUSCODE = @STATUSCODE))
-          and (@INTERACTIONTYPECODEID is null or (INTERACTIONTYPECODEID = @INTERACTIONTYPECODEID))
-          ' + @idsql + '
-      ) INTR
-      right join CONSTITUENT CONS on CONS.ID = INTR.CONSTITUENTID
-      group by CONS.ID';
+    with INTRAPPEAL AS (
+      select
+        CONSTITUENTID,
+        APPEALID,
+        ROW_NUMBER() OVER (PARTITION BY CONSTITUENTID ORDER BY ' + @DATEFIELD + ' ' + @DATETYPE + ') AS rn
+      from dbo.INTERACTION INTR
+      left join USR_INTERACTION_EXT_ME INTME on INTR.ID = INTME.ID
+      where   
+        ( 
+          (@ACTUALSTARTDATE is null and @ACTUALENDDATE is null) 
+          or (@ACTUALSTARTDATE is not null and @ACTUALENDDATE is null and ACTUALDATE >= @ACTUALSTARTDATE) 
+          or (@ACTUALENDDATE is not null and @ACTUALSTARTDATE is null and ACTUALDATE <= @ACTUALENDDATE)
+          or (@ACTUALSTARTDATE is not null and @ACTUALENDDATE is not null and ACTUALDATE >= @ACTUALSTARTDATE and ACTUALDATE <= @ACTUALENDDATE)
+        )
+        and (@INTERACTIONSUBCATEGORYID is null or (INTERACTIONSUBCATEGORYID=@INTERACTIONSUBCATEGORYID))
+        and (@INTERACTIONCATEGORYID  is null or (INTERACTIONSUBCATEGORYID in (select ID from INTERACTIONSUBCATEGORY where INTERACTIONCATEGORYID = @INTERACTIONCATEGORYID)))
+        and (
+		  (@PLANNEDSTARTDATE is null and @PLANNEDENDDATE is null)
+          or (@PLANNEDSTARTDATE is not null and @PLANNEDENDDATE is null and EXPECTEDDATE >= @PLANNEDSTARTDATE)
+          or (@PLANNEDSTARTDATE is null and @PLANNEDENDDATE is not null and EXPECTEDDATE <= @PLANNEDENDDATE)
+          or (@PLANNEDSTARTDATE is not null and @PLANNEDENDDATE is not null and EXPECTEDDATE >= @PLANNEDSTARTDATE and EXPECTEDDATE <= @PLANNEDENDDATE)
+        )
+        and (@OWNER is null or (FUNDRAISERID = @OWNER))
+        and (@STATUSCODE is null or (STATUSCODE = @STATUSCODE))
+        and (@INTERACTIONTYPECODEID is null or (INTERACTIONTYPECODEID = @INTERACTIONTYPECODEID))
+        ' + @idsql + '
+        ' + @blanksql + '
+    )
+    select
+      CONSTITUENTID AS ID,
+      APPEALID AS VALUE
+    from INTRAPPEAL
+    where rn = 1';
 
   exec sp_executesql @sql, N'
     @IDSETREGISTERID uniqueidentifier,
@@ -112,7 +125,7 @@ as
         </SearchList>
       </FormField>
       <FormField FieldID="RECORDTYPEID" DataType="Guid" ReadOnly="true" Hidden="true" />
-      <FormField FieldID="DATEFIELD" DataType="String" Required="true" Caption="Date field to return" DefaultValueText="Date">
+      <FormField FieldID="DATEFIELD" DataType="String" Required="true" Caption="Date field for sorting" DefaultValueText="Date">
         <ValueList>
           <Items>
             <Item>
@@ -130,20 +143,21 @@ as
           </Items>
         </ValueList>
       </FormField>
-      <FormField FieldID="DATETYPE" DataType="String" Required="true" Caption="Value to return" DefaultValueText="">
+      <FormField FieldID="DATETYPE" DataType="String" Required="true" Caption="Appeal to return" DefaultValueText="">
         <ValueList>
           <Items>
             <Item>
-              <Value>MIN</Value>
-              <Label>Earliest date</Label>
+              <Value>ASC</Value>
+              <Label>Earliest interaction date</Label>
             </Item>
             <Item>
-              <Value>MAX</Value>
-              <Label>Latest date</Label>
+              <Value>DESC</Value>
+              <Label>Latest interaction date</Label>
             </Item>
           </Items>
         </ValueList>
       </FormField>
+      <FormField FieldID="INCLUDEBLANKS" DataType="Boolean" Caption="Include blank appeals?" DefaultValueText="true" />
       <FormField FieldID="STATUSCODE" DataType="TinyInt" Caption="Status" DefaultValueText="0">
         <ValueList>
           <Items>
@@ -197,9 +211,9 @@ as
       </FormField>
     </FormFields>
     <WebUIComponent>
-      <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIAInteractionDatesUIModel" />
+      <UIModel AssemblyName="AIAInteractionsUIModel.dll" ClassName="AIAInteractionsUIModel.AIAInteractionAppealsUIModel" />
       <WebUI>
-        <ExternalResource Url="browser/htmlforms/custom/AIA/AIAInteractionDates.html" />
+        <ExternalResource Url="browser/htmlforms/custom/AIA/AIAInteractionAppeals.html" />
       </WebUI>
     </WebUIComponent>
     <UIActions>
